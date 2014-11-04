@@ -268,7 +268,7 @@ func TestSuccessfulAuthorizedPost(t *testing.T) {
 
 	token := &AccessToken{Token: "TOKEN", Secret: "SECRET"}
 
-	resp, err := c.Post(
+	resp, err := c.PostForm(
 		"http://www.mrjon.es/someurl", map[string]string{"key": "val"}, token)
 
 	assertEq(t, "7", m.httpClient.lastRequest.Header.Get("Content-Length"))

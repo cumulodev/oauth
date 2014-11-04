@@ -340,7 +340,7 @@ func (c *Consumer) makeAccessTokenRequest(params map[string]string, secret strin
 //      - err:
 //        Set only if there was an error, nil otherwise.
 func (c *Consumer) Get(url string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
-	return c.makeAuthorizedRequest("GET", url, LOC_URL, "", userParams, token)
+	return c.makeAuthorizedRequest("GET", url, LOC_URL, "", "", userParams, token)
 }
 
 func encodeUserParams(userParams map[string]string) string {
@@ -351,21 +351,101 @@ func encodeUserParams(userParams map[string]string) string {
 	return data.Encode()
 }
 
-// DEPRECATED: Use Post() instead.
+// Executes an HTTP Post, authorized via the AccessToken. The body is the form
+// urlencoded userParams.
+//      - url:
+//        The base url, without any query params, which is being accessed
+//
+//      - userParams:
+//        Any key=value params to be included in the query string. Will be form
+//		  urlencoded.
+//
+//      - token:
+//        The AccessToken returned by AuthorizeToken()
+//
+// This method returns:
+//      - resp:
+//        The HTTP Response resulting from making this request.
+//
+//      - err:
+//        Set only if there was an error, nil otherwise.
 func (c *Consumer) PostForm(url string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
-	return c.Post(url, userParams, token)
+	return c.makeAuthorizedRequest("POST", url, LOC_BODY, "", "", userParams, token)
 }
 
-func (c *Consumer) Post(url string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
-	return c.makeAuthorizedRequest("POST", url, LOC_BODY, "", userParams, token)
+// Executes an HTTP Post, authorized via the AccessToken. The body is provided as
+// string with an explicit content type.
+//      - url:
+//        The base url, without any query params, which is being accessed
+//
+//		- contentType:
+//		  The HTTP content type of the body
+//
+//		- body:
+//		  The message body for the POST request.
+//
+//      - userParams:
+//        Any key=value params to be included in the query string.
+//
+//      - token:
+//        The AccessToken returned by AuthorizeToken()
+//
+// This method returns:
+//      - resp:
+//        The HTTP Response resulting from making this request.
+//
+//      - err:
+//        Set only if there was an error, nil otherwise.
+func (c *Consumer) Post(url string, contentType string, body string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
+	return c.makeAuthorizedRequest("POST", url, LOC_URL, contentType, "", userParams, token)
 }
 
+// Executes an HTTP Delete, authorized via the AccessToken.
+//      - url:
+//        The base url, without any query params, which is being accessed
+//
+//      - userParams:
+//        Any key=value params to be included in the query string. Will be form
+//		  urlencoded.
+//
+//      - token:
+//        The AccessToken returned by AuthorizeToken()
+//
+// This method returns:
+//      - resp:
+//        The HTTP Response resulting from making this request.
+//
+//      - err:
+//        Set only if there was an error, nil otherwise.
 func (c *Consumer) Delete(url string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
-	return c.makeAuthorizedRequest("DELETE", url, LOC_URL, "", userParams, token)
+	return c.makeAuthorizedRequest("DELETE", url, LOC_URL, "", "", userParams, token)
 }
 
-func (c *Consumer) Put(url string, body string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
-	return c.makeAuthorizedRequest("PUT", url, LOC_URL, body, userParams, token)
+// Executes an HTTP Post, authorized via the AccessToken.
+//      - url:
+//        The base url, without any query params, which is being accessed
+//
+//		- contentType:
+//		  The HTTP content type of the body
+//
+//		- body:
+//		  The message body for the PUT request.
+//
+//      - userParams:
+//        Any key=value params to be included in the query string. Will be form
+//		  urlencoded.
+//
+//      - token:
+//        The AccessToken returned by AuthorizeToken()
+//
+// This method returns:
+//      - resp:
+//        The HTTP Response resulting from making this request.
+//
+//      - err:
+//        Set only if there was an error, nil otherwise.
+func (c *Consumer) Put(url string, contentType string, body string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
+	return c.makeAuthorizedRequest("PUT", url, LOC_URL, contentType, body, userParams, token)
 }
 
 func (c *Consumer) Debug(enabled bool) {
@@ -384,7 +464,7 @@ func (p pairs) Len() int           { return len(p) }
 func (p pairs) Less(i, j int) bool { return p[i].key < p[j].key }
 func (p pairs) Swap(i, j int)      { p[i], p[j] = p[j], p[i] }
 
-func (c *Consumer) makeAuthorizedRequest(method string, url string, dataLocation DataLocation, body string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
+func (c *Consumer) makeAuthorizedRequest(method string, url string, dataLocation DataLocation, contentType string, body string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
 	allParams := c.baseParams(c.consumerKey, c.AdditionalParams)
 
 	// Do not add the "oauth_token" parameter, if the access token has not been
@@ -428,7 +508,6 @@ func (c *Consumer) makeAuthorizedRequest(method string, url string, dataLocation
 	base_string := c.requestString(method, url, allParams)
 	authParams.Add(SIGNATURE_PARAM, c.signer.Sign(base_string, key))
 
-	contentType := ""
 	if dataLocation == LOC_BODY {
 		contentType = "application/x-www-form-urlencoded"
 	}
