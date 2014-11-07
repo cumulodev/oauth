@@ -397,7 +397,7 @@ func (c *Consumer) PostForm(url string, userParams map[string]string, token *Acc
 //      - err:
 //        Set only if there was an error, nil otherwise.
 func (c *Consumer) Post(url string, contentType string, body string, userParams map[string]string, token *AccessToken) (resp *http.Response, err error) {
-	return c.makeAuthorizedRequest("POST", url, LOC_URL, contentType, "", userParams, token)
+	return c.makeAuthorizedRequest("POST", url, LOC_URL, contentType, body, userParams, token)
 }
 
 // Executes an HTTP Delete, authorized via the AccessToken.
