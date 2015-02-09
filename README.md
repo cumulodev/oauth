@@ -1,7 +1,7 @@
 OAuth 1.0 Library for [Go](http://golang.org)
 ========================
 
-[![GoDoc](http://godoc.org/github.com/sprungknoedl/oauth?status.png)](http://godoc.org/github.com/sprungknoedl/oauth)
+[![GoDoc](http://godoc.org/github.com/cumulodev/oauth?status.png)](http://godoc.org/github.com/cumulodev/oauth)
 
 (If you need an OAuth 2.0 library, check out: http://code.google.com/p/goauth2/)
 
@@ -10,7 +10,7 @@ Developing your own apps, with this library
 
 * First, install the library
 
-        go get github.com/sprungknoedl/oauth
+        go get github.com/cumulodev/oauth
 
 * Then, check out the comments in oauth.go
 
